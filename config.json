@@ -1,0 +1,1 @@
+{"seed":13,"size":256,"width":64,"epochs":100,"learning_rate":0.0001,"base_step":0.1,"allocation_gain":1,"pixel_weight":100,"structure_weight":0.1,"orientation_weight":0.1,"displacement_weight":0.1,"pyramid":[8,16,32],"events":32,"sinkhorn_epsilon":0.05,"sinkhorn_iterations":50,"persistence_cutoff":0.05,"matching_tolerance":0.2,"variant":"full"}
