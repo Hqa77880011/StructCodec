@@ -61,3 +61,27 @@ Detection uses frozen Faster R-CNN/COCO mAP, segmentation uses a frozen ADE20K S
 ## Reproduction logic conventions
 
 Structure-survival matching first maximizes the number of pairs satisfying persistence and matching-tolerance requirements, then minimizes distance among those pairs. Ineligible matches receive a sufficiently large assignment cost; a cheap invalid pair cannot consume a valid alternative.
+
+## Selected executable codec setting
+
+`config.json` fixes RGB 256-by-256 images, width 64, the four-stage learned
+analysis/synthesis transform, base_step=0.1, allocation_gain=1 and uint8 transmitted
+criticality map. Gaussian likelihood trains the rate proxy; the actual stream is
+int16 symbols plus the map in a losslessly Deflate-compressed NPZ container.
+Complete container bytes define bpp. This is the chosen codec/entropy setting;
+a different neural entropy backend or external compression model is unnecessary.
+
+```bash
+python -m structcodec prepare --input data/images.csv --config config.json --output runs/deflate
+python -m structcodec train --config config.json --output runs/deflate --variant full
+python -m structcodec run --config config.json --output runs/deflate
+python -m structcodec evaluate --config config.json --output runs/deflate
+```
+
+The manifest supplies disjoint train/test image paths. Train and decode the same
+weights; the side map and quantization parameters are carried in each stream.
+Uniform/permuted/edge-only controls retain this exact coding container. Fidelity,
+actual bpp and thresholded structural survival are the primary endpoints; frozen
+detection/segmentation/depth models and their datasets are optional downstream
+endpoints and are not downloaded by the codec workflow. Real image files are
+the only required external run input for this chosen codec.
