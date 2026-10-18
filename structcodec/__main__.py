@@ -217,9 +217,10 @@ def run(c, out):
         survived = 0
         if len(eligible) and len(decoded_events):
             cost = np.linalg.norm(eligible[:, None] - decoded_events[None], axis=2)
-            a, b = linear_sum_assignment(cost)
-            survived = int(((np.abs(decoded_events[b, 1] - decoded_events[b, 0]) >= c['persistence_cutoff']) &
-                            (cost[a, b] <= c['matching_tolerance'])).sum())
+            valid = (cost <= c['matching_tolerance']) & (np.abs(decoded_events[:, 1] - decoded_events[:, 0])[None] >= c['persistence_cutoff'])
+            penalty = (max(cost.shape) + 1) * max(c['matching_tolerance'], 1.)
+            a, b = linear_sum_assignment(np.where(valid, cost, penalty))
+            survived = int(valid[a, b].sum())
         result = row._asdict()
         result.update(decoded=str(decoded.resolve()), bpp=8 * len(stream) / c['size'] ** 2,
                       psnr=-10 * np.log10(max(mse, 1e-12)), eligible_structures=len(eligible),

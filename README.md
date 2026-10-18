@@ -58,3 +58,6 @@ python -m structcodec.downstream bd-rate --input runs/rate_curve.csv --reference
 
 Detection uses frozen Faster R-CNN/COCO mAP, segmentation uses a frozen ADE20K SegFormer with mIoU, and depth uses a frozen NYU GLPN with metric RMSE. Rate-curve CSVs contain at least four distinct `bpp,psnr` points; BD-rate integrates log rate over common PSNR support. Sweep `base_step` using frozen codec weights and record complete stream bpp to select operating points. Preserve the same eligible image/structure panel across methods.
 
+## Reproduction logic conventions
+
+Structure-survival matching first maximizes the number of pairs satisfying persistence and matching-tolerance requirements, then minimizes distance among those pairs. Ineligible matches receive a sufficiently large assignment cost; a cheap invalid pair cannot consume a valid alternative.
