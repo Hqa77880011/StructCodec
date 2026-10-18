@@ -72,7 +72,9 @@ Complete container bytes define bpp. This is the chosen codec/entropy setting;
 a different neural entropy backend or external compression model is unnecessary.
 
 ```bash
-python -m structcodec prepare --input data/images.csv --config config.json --output runs/deflate
+python prepare_bsds500.py --plan
+python prepare_bsds500.py --output data/bsds500
+python -m structcodec prepare --input data/bsds500/images.csv --config config.json --output runs/deflate
 python -m structcodec train --config config.json --output runs/deflate --variant full
 python -m structcodec run --config config.json --output runs/deflate
 python -m structcodec evaluate --config config.json --output runs/deflate
@@ -83,5 +85,21 @@ weights; the side map and quantization parameters are carried in each stream.
 Uniform/permuted/edge-only controls retain this exact coding container. Fidelity,
 actual bpp and thresholded structural survival are the primary endpoints; frozen
 detection/segmentation/depth models and their datasets are optional downstream
-endpoints and are not downloaded by the codec workflow. Real image files are
-the only required external run input for this chosen codec.
+endpoints and are not downloaded by the codec workflow.
+
+`prepare_bsds500.py` acquires the public [BSDS500 release](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/resources.html)
+directly from Berkeley. It reads only regular image members and preserves the
+official 200 train, 100 validation and 200 test identities in `images.csv`.
+Paths are relative to the manifest, so the prepared data directory is portable.
+Only train rows fit the codec; validation is reserved for choosing configurations
+and test is evaluated after settings are frozen. No segmentation annotations or
+external pretrained codec are needed: structural fidelity is computed between
+each original image and its decoded reconstruction. The existing codec loader
+converts to RGB and applies the configured 256px square resize consistently.
+`source.json` records acquisition and preprocessing. A local official archive
+can be used with `--offline --archive data/BSR_bsds500.tgz`.
+
+Please cite Arbelaez et al., *Contour Detection and Hierarchical Image
+Segmentation*, TPAMI 2011, as requested on the dataset source page. The download
+script retains the original data; the repository's code license does not
+relicense those images.
